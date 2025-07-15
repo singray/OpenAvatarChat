@@ -66,7 +66,8 @@ class TTSCosyVoiceProcessor(spawn_context.Process):
                     raise TypeError('no valid model_type!')
             self.model.sample_rate = self.sample_rate
             if self.ref_audio_path:
-                self.ref_audio_buffer = load_wav(self.ref_audio_path, self.sample_rate)
+                #self.ref_audio_buffer = load_wav(self.ref_audio_path, self.sample_rate)
+                self.ref_audio_buffer = load_wav(self.ref_audio_path, 16000)
                 self.ref_audio_text = self.ref_audio_text
             init_text = '欢迎来到中国2025'
             response = None

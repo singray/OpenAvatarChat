@@ -15,6 +15,8 @@ from engine_utils.directory_info import DirectoryInfo
 from engine_utils.time_utils import timeit
 from engine_utils.inspect_utils import InspectUtils
 
+PYTHON = os.environ.get("PYTHON", "python")
+MODELSCOPE = os.environ.get("MODELSCOPE", "modelscope")
 
 class Tts2faceCpuAdapter(BaseAlgoAdapter):
 
@@ -107,7 +109,7 @@ class Tts2faceCpuAdapter(BaseAlgoAdapter):
         avatar_zip_path = os.path.join(avatar_dir, avatar_name)
         if not os.path.exists(avatar_zip_path):
             cmd = [
-                "modelscope", "download", "--model", "HumanAIGC-Engineering/LiteAvatarGallery", avatar_name,
+                PYTHON, MODELSCOPE, "download", "--model", "HumanAIGC-Engineering/LiteAvatarGallery", avatar_name,
                 "--local_dir", avatar_dir
                 ]
             logger.info("download avatar data from modelscope, cmd: {}", " ".join(cmd))

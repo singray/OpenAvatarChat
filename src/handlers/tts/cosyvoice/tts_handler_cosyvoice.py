@@ -20,7 +20,7 @@ from chat_engine.data_models.chat_data.chat_data_model import ChatData
 from chat_engine.data_models.chat_data_type import ChatDataType
 from chat_engine.contexts.session_context import SessionContext
 from chat_engine.data_models.runtime_data.data_bundle import DataBundle, DataBundleDefinition, DataBundleEntry
-from handlers.tts.cosyvoice.cosyvoice_processor import TTSCosyVoiceProcessor
+from handlers.tts.cosyvoice.cosyvoice_processor_new import TTSCosyVoiceProcessor
 import modelscope
 
 from engine_utils.directory_info import DirectoryInfo

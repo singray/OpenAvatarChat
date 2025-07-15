@@ -1,7 +1,7 @@
 import asyncio
 from typing import Dict, Optional, cast, Union, Tuple
 from uuid import uuid4
-
+from loguru import logger
 import gradio
 import numpy as np
 from fastapi import FastAPI
@@ -171,9 +171,14 @@ class ClientHandlerRtc(ClientHandlerBase):
         self.prepare_rtc_definitions()
 
     def setup_rtc_ui(self, ui, parent_block, **extra_rtc_params):
+        logger.info(f"self.handler_config: {self.handler_config}")
+        logger.info(f"self.engine_config: {self.engine_config}")
         turn_entity = RTCProvider().prepare_rtc_configuration(self.handler_config.turn_config)
+        logger.info(f"self.engine_config: {turn_entity}")
         if turn_entity is None:
+            logger.info(f"self.engine_config: {self.engine_config}")
             turn_entity = RTCProvider().prepare_rtc_configuration(self.engine_config)
+            logger.info(f"turn_entity: {turn_entity.rtc_configuration}")
         if parent_block is None:
             parent_block = ui
         with ui:
