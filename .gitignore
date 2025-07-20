@@ -6,7 +6,8 @@
 .idea
 .mypy_cache
 .vscode
-.glut
+/.glut
+.glut/
 /build
 /dist
 /docs/_build
