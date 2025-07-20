@@ -1,0 +1,109 @@
+# 配置的默认部分，包含整个系统的通用配置
+default:
+  # 日志相关配置
+  logger:
+    # 日志级别设置为 "INFO"，意味着将记录信息级别的日志，可根据需要调整
+    log_level: "INFO"
+  # 服务相关配置，主要涉及服务的网络监听和安全设置
+  service:
+    # 服务监听的主机地址，这里设置为 "127.0.0.1"，表示仅监听本地回环地址，只能本地访问
+    host: "0.0.0.0"
+    # 服务监听的端口号，8282 为具体的端口，可根据实际情况修改
+    port: 8282
+    # SSL 证书文件的路径，用于启用 HTTPS 连接，确保通信安全
+    cert_file: "ssl_certs/localhost.crt"
+    # SSL 证书密钥文件的路径，与证书文件配合使用，用于 HTTPS 连接
+    cert_key: "ssl_certs/localhost.key" 
+    rtc_config:
+      # 使用turnserver时，使用以下配置
+      urls: ["turn:turn.120-224-27-114.turnserver:3478", "turns:turn.120-224-27-114.turnserver:5349"]
+      username: "admin"
+      credential: "admin@123~"
+    #rtc_config:
+    #  # 使用turnserver时，使用以下配置
+    #  urls: ["turn:120.224.27.114:3478", "turns:120.224.27.114:5349"]
+    #  username: "admin"
+    #  credential: "admin@123~"      
+  # 聊天引擎相关配置，包含模型存储和处理程序设置
+  chat_engine:
+    # 模型存储的根目录，所有相关模型文件将存放在此目录下
+    model_root: "models"
+    # 处理程序（Handler）的搜索路径，程序会在这些路径下查找所需的处理程序模块
+    handler_search_path:
+      - "src/handlers"
+    # 处理程序的具体配置，包含各个处理模块的详细设置
+    handler_configs:
+      #RtcClient:
+      #  module: client/rtc_client/client_handler_rtc
+      #  concurrent_limit: 4
+      # LAM 客户端处理程序配置，用于 LAM 项目生成的资产的端侧渲染
+      LamClient:
+        # 处理程序模块的路径，指定了具体的模块文件位置
+        module: client/h5_rendering_client/client_handler_lam
+        # 数字人形象资产的路径，这里指定了一个压缩包，用于加载特定的数字人形象
+        asset_path: "lam_samples/060201.zip"
+        # 并发连接的限制数量，即允许同时连接的客户端数量上限
+        concurrent_limit: 5
+      # 语音活动检测（VAD）处理程序配置，使用 SileroVAD 进行语音检测
+      SileroVad:
+        # 处理程序模块的路径，指定了 SileroVAD 处理程序的位置
+        module: vad/silerovad/vad_handler_silero
+        # 说话阈值，用于判断音频中是否存在语音，值为 0.5 表示当语音概率超过 0.5 时判定为有语音
+        speaking_threshold: 0.5
+        # 语音开始检测的延迟，以音频采样数为单位，确保语音稳定出现后才判定为开始说话
+        start_delay: 2048
+        # 语音结束检测的延迟，以音频采样数为单位，确保语音停止一段时间后才判定为结束说话
+        end_delay: 5000
+        # 缓冲区回溯时间，用于检测语音的结束，避免语音开头部分被截断，以音频采样数为单位
+        buffer_look_back: 5000
+        # 语音前后的填充长度，以音频采样数为单位，在语音前后添加一定长度的静音，使语音更连贯
+        speech_padding: 512
+      # 自动语音识别（ASR）处理程序配置，使用 SenseVoice 进行语音识别
+      SenseVoice:
+        # 是否启用该处理程序，设置为 True 表示启用
+        enabled: True
+        # 处理程序模块的路径，指定了 SenseVoice 处理程序的位置
+        module: asr/sensevoice/asr_handler_sensevoice
+        # 使用的 ASR 模型名称，这里选择了 "iic/SenseVoiceSmall" 模型
+        model_name: "iic/SenseVoiceSmall"
+      # 文本转语音（TTS）处理程序配置，使用 Edge TTS 进行文本到语音的转换
+      #CosyVoice:
+      #  enabled: True
+      #  module: tts/cosyvoice/tts_handler_cosyvoice
+      #  # api_url: 'http://127.0.0.1:50000/inference_sft' #run CosyVoice/runtime/python/fastapi/server.py
+      #  model_name: "iic/CosyVoice-300M-SFT" # run cosyvoice in code
+      #  #spk_id: "中文女" # use sft model
+      #  ref_audio_path: "open-video-chat/src/third_party/CosyVoice/asset/voice2.wav" #use zero_shot model
+      #  ref_audio_text: "窗前明月光,疑是地上霜,举头望明月,低头思故乡"
+      #  sample_rate: 24000
+      #  process_num: 2
+      CosyVoice:
+        enabled: True
+        module: tts/cosyvoice/tts_handler_cosyvoice
+        # api_url: 'http://127.0.0.1:50000/inference_sft' #run CosyVoice/runtime/python/fastapi/server.py
+        model_name: "iic/CosyVoice-300M-SFT" # run cosyvoice in code
+        spk_id: "中文男" # use sft model
+        #ref_audio_path: "open-video-chat/src/third_party/CosyVoice/asset/voice2.wav" #use zero_shot model
+        #ref_audio_text: "窗前明月光,疑是地上霜,举头望明月,低头思故乡"
+        sample_rate: 24000
+        process_num: 2        
+      # 大语言模型（LLM）处理程序配置，使用 OpenAI 兼容的 API 调用大语言模型
+      LLM_Bailian:
+        # 是否启用该处理程序，设置为 True 表示启用
+        enabled: True
+        # 处理程序模块的路径，指定了 OpenAI 兼容处理程序的位置
+        module: llm/openai_compatible/llm_handler_openai_compatible
+        # 使用的语言模型名称，这里选择了 "glm-4-flash-250414" 模型
+        model_name: "glm-4-flash-250414"
+        # 是否启用视频输入，设置为 False 表示不启用，需确保所选的 LLM 支持视频输入才能启用
+        enable_video_input: False
+        # 系统提示信息，告知模型如何回答用户的问题，规范模型的回答方式
+        system_prompt: "请你扮演一个 AI 助手，用简短的两三句对话来回答用户的问题，并在对话内容中加入合适的标点符号，不需要讨论标点符号相关的内容"
+        # 调用 LLM 的 API 地址，这里使用了 BigModel 的 API 地址
+        api_url: "https://open.bigmodel.cn/api/paas/v4"
+        # API 密钥，用于访问 API 服务，这里直接填写了密钥，也可从环境变量获取
+        api_key: "eafa5da883b3434a9f503f978e86d252.DfvstJUpTjf6B136"
+      # LAM 数字人驱动处理程序配置，用于驱动 LAM 数字人的表情和动作
+      LAM_Driver:
+        # 处理程序模块的路径，指定了 LAM 数字人驱动处理程序的位置
+        module: avatar/lam/avatar_handler_lam_audio2expression
