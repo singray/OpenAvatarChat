@@ -1,4 +1,3 @@
-.git/*
 models/*
 ssl_certs/*
 build/*
