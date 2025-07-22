@@ -32,18 +32,20 @@ def parse_args():
     parser.add_argument("--port", type=int, help="service host port")
     parser.add_argument("--config", type=str, default="config/glut.yaml", help="config file to use")
     parser.add_argument("--env", type=str, default="default", help="environment to use in config file")
+    parser.add_argument("--path", type=str, default="/ui", help="Gradio app mount path and root path")  # 新增参数
+
     return parser.parse_args()
 
 
-def setup_demo():
+def setup_demo(mount_path):
     """
     设置演示应用，创建 FastAPI 应用和 Gradio 界面
     """
     app = FastAPI()
 
-    @app.get("/")
-    def get_root():
-        return RedirectResponse(url="/ui")
+    #@app.get("/")
+    #def get_root():
+    #    return RedirectResponse(url="/ui")
 
     @app.get("/ui/static/fonts/system-ui/system-ui-Regular.woff2")
     @app.get("/ui/static/fonts/ui-sans-serif/ui-sans-serif-Regular.woff2")
@@ -70,7 +72,13 @@ def setup_demo():
         with gr.Column():
             with gr.Group() as rtc_container:
                 pass
-    gradio.mount_gradio_app(app, gradio_block, "/ui")
+    #gradio.mount_gradio_app(app, gradio_block, "/ui")
+    gradio.mount_gradio_app(
+        app=app,
+        blocks=gradio_block,
+        path=mount_path,  # FastAPI 中的路由路径
+        root_path=mount_path  # 告诉 Gradio 生成 URL 时的根路径前缀
+    )
     return app, gradio_block, rtc_container
 
 def main():
@@ -79,12 +87,15 @@ def main():
     """
     # 解析命令行参数
     args = parse_args()
+    logger.info(f"args.path1: {args.path}")
+    logger.info(f"args.port1: {args.port}")
     # 加载配置文件，获取日志配置、服务配置和引擎配置
     logger_config, service_config, engine_config = load_configs(args)
     
     logger.info(f"service_config: {service_config}")
     logger.info(f"engine_config: {engine_config}")
-
+    logger.info(f"args.path2: {args.path}")
+    logger.info(f"args.port2: {args.port}")
     # 设置modelscope的默认下载地址
     # 设置模型缓存路径
     if not os.path.isabs(engine_config.model_root):
@@ -95,13 +106,13 @@ def main():
     # 创建聊天引擎
     chat_engine = ChatEngine()
     # 设置演示应用，获取 FastAPI 应用、Gradio 界面和 RTC 容器
-    demo_app, ui, parent_block = setup_demo()
+    demo_app, ui, parent_block = setup_demo(args.path)
     # 初始化聊天引擎，传入配置和应用信息
     chat_engine.initialize(engine_config, app=demo_app, ui=ui, parent_block=parent_block)
 
     ssl_context = create_ssl_context(args, service_config)
     # 启动 FastAPI 服务
-    uvicorn.run(demo_app, host=service_config.host, port=service_config.port, **ssl_context)
+    uvicorn.run(demo_app, host=service_config.host, port=args.port, **ssl_context)
 
 
 if __name__ == "__main__":
