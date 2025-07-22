@@ -9,3 +9,4 @@ IOQueueType = Union[queue.Queue, asyncio.Queue]
 class SessionInfoData(BaseModel):
     session_id: str
     timestamp_base: int = Field(default=16000)
+    user_id: str = Field(default="")

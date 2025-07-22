@@ -98,6 +98,7 @@ class HandlerLLM(HandlerBase, ABC):
         context.api_key = handler_config.api_key
         context.api_url = handler_config.api_url
         context.enable_video_input = handler_config.enable_video_input
+        context.user_id = session_context.session_info.user_id
         context.dify_chat_messages = handler_config.dify_chat_messages
         context.dify_code = handler_config.dify_code
         context.dify_upload = handler_config.dify_upload
@@ -159,7 +160,7 @@ class HandlerLLM(HandlerBase, ABC):
             "query": chat_text,
             "response_mode": "streaming",
             "conversation_id": context.conversation_id or "",
-            "user": "user",
+            "user": context.user_id or "",
             "files": []
         }
 
