@@ -42,6 +42,7 @@ def setup_demo(mount_path):
     设置演示应用，创建 FastAPI 应用和 Gradio 界面
     """
     app = FastAPI()
+    app.state.mount_path = mount_path  # 存储mount_path到app状态
 
     #@app.get("/")
     #def get_root():

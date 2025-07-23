@@ -140,8 +140,9 @@ class ClientHandlerLam(ClientHandlerRtc):
             raise ValueError(msg)
 
     def on_setup_app(self, app: FastAPI, ui: gradio.blocks.Block, parent_block: Optional[gradio.blocks.Block] = None):
-        asset_route = "/download/lam_asset"
-        motion_data_route = "/ws/lam_data_stream"
+        mount_path = app.state.get("mount_path", "").rstrip('/')
+        asset_route = f"{mount_path}/download/lam_asset"
+        motion_data_route = f"{mount_path}/ws/lam_data_stream"
 
         @app.websocket(motion_data_route + "/{rtc_id}")
         async def motion_data_stream(websocket: WebSocket, rtc_id: str):
