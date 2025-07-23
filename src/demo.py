@@ -42,8 +42,7 @@ def setup_demo(mount_path):
     设置演示应用，创建 FastAPI 应用和 Gradio 界面
     """
     app = FastAPI()
-    app.state.mount_path = mount_path  # 存储mount_path到app状态
-
+    app.state.mount_path = mount_path
     #@app.get("/")
     #def get_root():
     #    return RedirectResponse(url="/ui")
@@ -73,7 +72,6 @@ def setup_demo(mount_path):
         with gr.Column():
             with gr.Group() as rtc_container:
                 pass
-    #gradio.mount_gradio_app(app, gradio_block, "/ui")
     gradio.mount_gradio_app(
         app=app,
         blocks=gradio_block,
