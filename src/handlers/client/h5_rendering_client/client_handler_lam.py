@@ -140,11 +140,14 @@ class ClientHandlerLam(ClientHandlerRtc):
             raise ValueError(msg)
 
     def on_setup_app(self, app: FastAPI, ui: gradio.blocks.Block, parent_block: Optional[gradio.blocks.Block] = None):
-        mount_path = app.state.get("mount_path", "").rstrip('/')
-        asset_route = f"{mount_path}/download/lam_asset"
-        motion_data_route = f"{mount_path}/ws/lam_data_stream"
+        # 1. 定义前缀（可从app.state获取，默认/shujia/ui，确保路径格式正确）
+        prefix = getattr(app.state, "mount_path", "/shujia/ui").rstrip("/")  # 移除开头和结尾斜杠，避免重复
+        # 2. 拼接前缀到原路由，生成完整路径
+        asset_route = f"/avatar/{prefix}/download/lam_asset"
+        motion_data_route = f"/avatar/{prefix}/ws/lam_data_stream"
 
-        @app.websocket(motion_data_route + "/{rtc_id}")
+        # 3. WebSocket路由使用拼接后的完整路径
+        @app.websocket(f"{motion_data_route}/{{rtc_id}}")  # 最终路径：/shujia/ui/ws/lam_data_stream/{rtc_id}
         async def motion_data_stream(websocket: WebSocket, rtc_id: str):
             await websocket.accept()
             logger.info(f"Got websocket connection {websocket} for rtc_id {rtc_id}.")
@@ -155,22 +158,23 @@ class ClientHandlerLam(ClientHandlerRtc):
                 await websocket.close(4503, msg)
             await session_delegate.serve_websocket(websocket)
 
-        @app.get(asset_route + "/{file_name}")
+        # 4. 文件下载路由使用拼接后的完整路径
+        @app.get(f"{asset_route}/{{file_name}}")  # 最终路径：/shujia/ui/download/lam_asset/{file_name}
         async def get_asset(file_name: str):
             file_path = os.path.join(self.asset_path, file_name)
             if not os.path.isfile(file_path):
                 logger.error(f"Failed to get lam asset file: {file_path}")
                 return JSONResponse(status_code=404, content={"message": "File not found"})
             logger.info(f"Return lam asset file: {file_path}")
-            response = FileResponse(file_path)
-            return response
+            return FileResponse(file_path)
 
+        # 5. 同步更新UI中的路径（确保前端生成的URL包含前缀）
         self.setup_rtc_ui(
             ui=ui,
             parent_block=parent_block,
             avatar_type="gs",
-            avatar_ws_route=motion_data_route,
-            avatar_assets_path=f"{asset_route}/{self.asset_name}",
+            avatar_ws_route=motion_data_route,  # 前端WebSocket连接路径：/shujia/ui/ws/lam_data_stream
+            avatar_assets_path=f"{asset_route}/{self.asset_name}",  # 前端资源路径：/shujia/ui/download/lam_asset/xxx
         )
 
     def create_context(self, session_context: SessionContext,
