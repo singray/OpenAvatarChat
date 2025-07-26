@@ -143,8 +143,8 @@ class ClientHandlerLam(ClientHandlerRtc):
         # 1. 定义前缀（可从app.state获取，默认/shujia/ui，确保路径格式正确）
         prefix = getattr(app.state, "mount_path", "/shujia/ui").rstrip("/")  # 移除开头和结尾斜杠，避免重复
         # 2. 拼接前缀到原路由，生成完整路径
-        asset_route = f"/avatar/{prefix}/download/lam_asset"
-        motion_data_route = f"/avatar/{prefix}/ws/lam_data_stream"
+        asset_route = f"/avatar{prefix}/download/lam_asset"
+        motion_data_route = f"/avatar{prefix}/ws/lam_data_stream"
 
         # 3. WebSocket路由使用拼接后的完整路径
         @app.websocket(f"{motion_data_route}/{{rtc_id}}")  # 最终路径：/shujia/ui/ws/lam_data_stream/{rtc_id}
